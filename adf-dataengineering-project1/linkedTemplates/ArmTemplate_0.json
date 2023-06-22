@@ -14,7 +14,7 @@
 		"onpremsqlserver_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'onpremsqlserver'",
-			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2022;User ID=tctrebb"
+			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorks2022Full;User ID=tctrebb"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
@@ -263,7 +263,10 @@
 				"annotations": [],
 				"type": "SqlServerTable",
 				"schema": [],
-				"typeProperties": {}
+				"typeProperties": {
+					"schema": "HumanResources",
+					"table": "Department"
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/onpremsqlserver')]"
@@ -541,14 +544,7 @@
 					{
 						"name": "bronze to silver",
 						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "ForEach Schema Table",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -568,14 +564,7 @@
 					{
 						"name": "silver to gold",
 						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "bronze to silver",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,

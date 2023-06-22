@@ -14,7 +14,7 @@
 		"onpremsqlserver_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'onpremsqlserver'",
-			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2022;User ID=tctrebb"
+			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorks2022Full;User ID=tctrebb"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
