@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "SqlServer",
 		"typeProperties": {
-			"connectionString": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorksFull;User ID=tctrebb",
+			"connectionString": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorks2022Full;User ID=tctrebb",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
