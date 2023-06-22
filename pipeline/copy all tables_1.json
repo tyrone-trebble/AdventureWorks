@@ -116,14 +116,7 @@
 			{
 				"name": "bronze to silver",
 				"type": "DatabricksNotebook",
-				"dependsOn": [
-					{
-						"activity": "ForEach Schema Table",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -143,14 +136,7 @@
 			{
 				"name": "silver to gold",
 				"type": "DatabricksNotebook",
-				"dependsOn": [
-					{
-						"activity": "bronze to silver",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
