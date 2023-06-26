@@ -14,7 +14,7 @@
 		"onpremsqlserver_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'onpremsqlserver'",
-			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorks2022Full;User ID=tctrebb"
+			"defaultValue": "Integrated Security=False;Data Source=DESKTOP-O1BK34A\\SQLEXPRESS;Initial Catalog=AdventureWorksDW2022;User ID=tctrebb"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
@@ -186,7 +186,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "SqlServerSource",
-								"sqlReaderQuery": "SELECT\n    schema_name(schema_id) AS [SchemaName],\n    name AS [TableName]\nFROM\n    sys.tables\nWHERE\n    schema_name(schema_id) <> 'dbo';",
+								"sqlReaderQuery": "SELECT\n    SCHEMA_NAME(schema_id) AS [SchemaName],\n    name AS [TableName]\nFROM\n    sys.tables;",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
@@ -252,7 +252,7 @@
 											"type": "TabularTranslator",
 											"typeConversion": true,
 											"typeConversionSettings": {
-												"allowDataTruncation": true,
+												"allowDataTruncation": false,
 												"treatBooleanAsNumber": false
 											}
 										}
@@ -287,7 +287,14 @@
 					{
 						"name": "bronze to silver",
 						"type": "DatabricksNotebook",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "ForEach Schema Table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -307,7 +314,14 @@
 					{
 						"name": "silver to gold",
 						"type": "DatabricksNotebook",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "bronze to silver",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -482,8 +496,8 @@
 				"type": "SqlServerTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": "HumanResources",
-					"table": "Department"
+					"schema": "dbo",
+					"table": "DimEmployee"
 				}
 			},
 			"dependsOn": [
