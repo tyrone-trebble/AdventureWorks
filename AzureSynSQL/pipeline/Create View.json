@@ -16,16 +16,19 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "GoldTables",
+						"referenceName": "goldtables1",
 						"type": "DatasetReference"
 					},
-					"fieldList": [],
+					"fieldList": [
+						"childItems"
+					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
-						"type": "JsonReadSettings"
+						"type": "BinaryReadSettings"
 					}
 				}
 			},
@@ -42,6 +45,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Table Names').output.childItems",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Stored procedure",
@@ -55,8 +62,20 @@
 								"secureInput": false
 							},
 							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[CreateSQLServerlessView_gold]",
+								"storedProcedureParameters": {
+									"ViewName": {
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
 							"linkedServiceName": {
-								"referenceName": "synw-dataengineering-WorkspaceDefaultSqlServer",
+								"referenceName": "serverlessSQLdb",
 								"type": "LinkedServiceReference"
 							}
 						}

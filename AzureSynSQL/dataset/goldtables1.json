@@ -1,0 +1,18 @@
+{
+	"name": "goldtables1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "synw-dataengineering-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "dbo",
+				"fileSystem": "gold"
+			}
+		}
+	}
+}
