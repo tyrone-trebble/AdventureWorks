@@ -23,6 +23,8 @@ for i in dbutils.fs.ls('mnt/bronze/dbo/'):
 for i in table_name:
     path = '/mnt/bronze/dbo/' + i + '/'
     df = spark.read.format('parquet').load(path)
+
+    Get column names
     column = df.columns
 
     #Transform date format in each parquet file to yyyy-MM-dd
