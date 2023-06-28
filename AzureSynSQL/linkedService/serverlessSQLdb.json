@@ -1,0 +1,14 @@
+{
+	"name": "serverlessSQLdb",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=synw-dataengineering-ondemand.sql.azuresynapse.net;Initial Catalog=Gold_DB1"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
