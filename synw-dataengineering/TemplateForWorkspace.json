@@ -12,6 +12,11 @@
 			"metadata": "Secure string for 'connectionString' of 'synw-dataengineering-WorkspaceDefaultSqlServer'",
 			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-dataengineering.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
+		"serverlessSQLdb_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'serverlessSQLdb'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=synw-dataengineering-ondemand.sql.azuresynapse.net;Initial Catalog=Gold_DB1"
+		},
 		"synw-dataengineering-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dengdatalakegen2.dfs.core.windows.net"
@@ -21,6 +26,343 @@
 		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Table Names",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "goldtables1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach Table Name",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Table Names",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Table Names').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Stored procedure",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[dbo].[CreateSQLServerlessView_gold]",
+										"storedProcedureParameters": {
+											"ViewName": {
+												"value": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "serverlessSQLdb",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/goldtables1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/serverlessSQLdb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/GoldTables')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synw-dataengineering-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "dbo",
+						"fileSystem": "gold"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"commitInfo": {
+							"type": "object",
+							"properties": {
+								"timestamp": {
+									"type": "integer"
+								},
+								"userId": {
+									"type": "string"
+								},
+								"userName": {
+									"type": "string"
+								},
+								"operation": {
+									"type": "string"
+								},
+								"operationParameters": {
+									"type": "object",
+									"properties": {
+										"mode": {
+											"type": "string"
+										},
+										"partitionBy": {
+											"type": "string"
+										}
+									}
+								},
+								"notebook": {
+									"type": "object",
+									"properties": {
+										"notebookId": {
+											"type": "string"
+										}
+									}
+								},
+								"clusterId": {
+									"type": "string"
+								},
+								"isolationLevel": {
+									"type": "string"
+								},
+								"isBlindAppend": {
+									"type": "boolean"
+								},
+								"operationMetrics": {
+									"type": "object",
+									"properties": {
+										"numFiles": {
+											"type": "string"
+										},
+										"numOutputRows": {
+											"type": "string"
+										},
+										"numOutputBytes": {
+											"type": "string"
+										}
+									}
+								},
+								"engineInfo": {
+									"type": "string"
+								},
+								"txnId": {
+									"type": "string"
+								},
+								"job": {
+									"type": "object",
+									"properties": {
+										"jobId": {
+											"type": "string"
+										},
+										"jobName": {
+											"type": "string"
+										},
+										"runId": {
+											"type": "string"
+										},
+										"jobOwnerId": {
+											"type": "string"
+										},
+										"triggerType": {
+											"type": "string"
+										}
+									}
+								},
+								"readVersion": {
+									"type": "integer"
+								}
+							}
+						},
+						"protocol": {
+							"type": "object",
+							"properties": {
+								"minReaderVersion": {
+									"type": "integer"
+								},
+								"minWriterVersion": {
+									"type": "integer"
+								}
+							}
+						},
+						"metaData": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "string"
+								},
+								"format": {
+									"type": "object",
+									"properties": {
+										"provider": {
+											"type": "string"
+										},
+										"options": {
+											"type": "object"
+										}
+									}
+								},
+								"schemaString": {
+									"type": "string"
+								},
+								"partitionColumns": {
+									"type": "array"
+								},
+								"configuration": {
+									"type": "object"
+								},
+								"createdTime": {
+									"type": "integer"
+								}
+							}
+						},
+						"add": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"partitionValues": {
+									"type": "object"
+								},
+								"size": {
+									"type": "integer"
+								},
+								"modificationTime": {
+									"type": "integer"
+								},
+								"dataChange": {
+									"type": "boolean"
+								},
+								"stats": {
+									"type": "string"
+								},
+								"tags": {
+									"type": "object",
+									"properties": {
+										"INSERTION_TIME": {
+											"type": "string"
+										},
+										"MIN_INSERTION_TIME": {
+											"type": "string"
+										},
+										"MAX_INSERTION_TIME": {
+											"type": "string"
+										},
+										"OPTIMIZE_TARGET_SIZE": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						},
+						"remove": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string"
+								},
+								"deletionTimestamp": {
+									"type": "integer"
+								},
+								"dataChange": {
+									"type": "boolean"
+								},
+								"extendedFileMetadata": {
+									"type": "boolean"
+								},
+								"partitionValues": {
+									"type": "object"
+								},
+								"size": {
+									"type": "integer"
+								},
+								"tags": {
+									"type": "object",
+									"properties": {
+										"INSERTION_TIME": {
+											"type": "string"
+										},
+										"MIN_INSERTION_TIME": {
+											"type": "string"
+										},
+										"MAX_INSERTION_TIME": {
+											"type": "string"
+										},
+										"OPTIMIZE_TARGET_SIZE": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/synw-dataengineering-WorkspaceDefaultStorage')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/synw-dataengineering-WorkspaceDefaultSqlServer')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
@@ -82,6 +424,68 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sp_CreateSQLServerlessView_gold')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE Gold_DB1\nGO\n\nCREATE OR ALTER PROC CreateSQLServerlessView_gold @ViewName NVARCHAR(100)\nAS\nBEGIN\n\nDECLARE @statement VARCHAR(MAX)\n\n    SET @statement = N'CREATE OR ALTER VIEW ' + @ViewName + ' AS\n        SELECT *\n        FROM\n            OPENROWSET(\n            BULK ''https://dengdatalakegen2.dfs.core.windows.net/gold/dbo/' + @ViewName + '/'',\n            FORMAT = ''DELTA''\n        ) as [result]'\n\nEXEC (@statement)\n\nEND\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "Gold_DB1",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/serverlessSQLdb')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('serverlessSQLdb_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/goldtables1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synw-dataengineering-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "dbo",
+						"fileSystem": "gold"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/synw-dataengineering-WorkspaceDefaultStorage')]"
+			]
 		}
 	]
 }

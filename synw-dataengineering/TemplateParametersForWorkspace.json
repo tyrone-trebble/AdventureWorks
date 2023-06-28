@@ -8,6 +8,9 @@
 		"synw-dataengineering-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-dataengineering.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
+		"serverlessSQLdb_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=synw-dataengineering-ondemand.sql.azuresynapse.net;Initial Catalog=Gold_DB1"
+		},
 		"synw-dataengineering-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://dengdatalakegen2.dfs.core.windows.net"
 		}
