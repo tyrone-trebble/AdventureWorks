@@ -14,9 +14,11 @@ import os
 
 table_name = []
 
+#Iterate through silver container to assing to table array
 for i in dbutils.fs.ls('mnt/silver/dbo/'):
     table_name.append(i.name.split('/')[0])
-    
+
+#Load delata files to data frame
 for name in table_name:
     path = '/mnt/silver/dbo/' + name
     df = spark.read.format('delta').load(path)
